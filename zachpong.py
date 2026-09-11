@@ -1,5 +1,6 @@
 import pygame
 import time
+import random
 
 # pygame setup
 pygame.init()
@@ -14,8 +15,12 @@ clock = pygame.time.Clock()
 running = True
 dt = 0
 
+level = 1
 vx = 300
 vy = 300
+random_posx = random.randint(0 , WIDTH)
+random_posy = random.randint(0, HEIGHT)
+random_pos = pygame.Vector2(random_posx , random_posy)
 
 ball_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 left_paddle = pygame.Rect(WIDTH // 5 , HEIGHT // 2, 20 , 200)
@@ -31,15 +36,35 @@ big_font = pygame.font.Font('Minecraft-Seven_v2.woff2', 200)
 
 last_frame_score = False
 
+
+
+
+
+
+
 while running:
-    # poll for events
-    # pygame.QUIT event means the user clicked X to close your window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    # fill the screen with a color to wipe away anything from last frame
-    screen.fill("purple")
+    # 2ND LEVEL
+
+    if score >= 5:
+        level += 1
+        score = 0
+        vx += 100
+        vy += 100
+
+    if level % 2 == 0:
+        screen.fill((25, 25, 112))
+    if level % 2 != 0:
+        screen.fill('purple')
+
+    level_text_surface = font.render(f"Level: {level}", True, (0, 0, 0))
+    screen.blit(level_text_surface, (1000, 50))
+
+
+    # FIRST LEVEL
 
     pygame.draw.circle(screen, "red", ball_pos, 40)
     pygame.draw.rect(screen , "grey" , left_paddle)
@@ -59,15 +84,18 @@ while running:
     if ball_pos.y < 100:
         vy *= -1
         bone.play()
+        vx += random.randint(-5,5)
     if ball_pos.y > HEIGHT - 70:
         vy *= -1
         bone.play()
+        vx += random.randint(-5,5)
 
     if ball_rect.colliderect(left_paddle) and not last_frame_score:
         vx *= -1
         coin.play()
         score += 1
         last_frame_score = True
+        vx += random.randint(-5,5)
     
     if not ball_rect.colliderect(left_paddle):
         last_frame_score = False
@@ -106,6 +134,6 @@ while running:
     # limits FPS to 60
     # dt is delta time in seconds since last frame, used for framerate-
     # independent physics.
-    dt = clock.tick(60) / 1000
+    dt = clock.tick(120) / 1000
 
 pygame.quit()

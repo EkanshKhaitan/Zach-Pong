@@ -18,9 +18,7 @@ dt = 0
 level = 1
 vx = 400
 vy = 400
-random_posx = random.randint(0 , WIDTH)
-random_posy = random.randint(0, HEIGHT)
-random_pos = pygame.Vector2(random_posx , random_posy)
+
 
 ball_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 paddle_height = 200
@@ -44,6 +42,8 @@ play_again = pygame.image.load('playagain.png').convert_alpha()
 bone = pygame.mixer.Sound('bone.mp3')
 coin = pygame.mixer.Sound('coin.mp3')
 click = pygame.mixer.Sound('mouseclick.mp3')
+oof = pygame.mixer.Sound('oof.mp3')
+levelup = pygame.mixer.Sound('levelup.mp3')
 
 font = pygame.font.Font('Minecraft-Seven_v2.woff2', 50)
 big_font = pygame.font.Font('Minecraft-Seven_v2.woff2', 200)
@@ -56,14 +56,18 @@ while running:
     mouse_rect = pygame.Rect((pygame.mouse.get_pos()), (1, 1))
 
     if score >= 5:
+        levelup.play()
         level += 1
         score = 0
         vx += 100
         vy += 100
         paddle_height *= 0.8
+        rr = random.randint(50, 200)
+        rg = random.randint(50, 200)
+        rb = random.randint(50, 200)
 
     if level % 2 == 0:
-        screen.fill((25, 25, 112))
+        screen.fill((rr, rg, rb))
     if level % 2 != 0:
         screen.fill('purple')
 
@@ -107,7 +111,8 @@ while running:
     if not ball_rect.colliderect(left_paddle):
         last_frame_score = False
 
-    if ball_pos.x <= 50:
+
+    if ball_pos.x <= 100:
         vx = 0
         vy = 0
         screen.fill("black")
@@ -126,6 +131,7 @@ while running:
 
         if mouse_rect.colliderect(playagain_rect):
             if event.type == pygame.MOUSEBUTTONDOWN:
+                click.play()
                 level = 1
                 vx = 400
                 vy = 400

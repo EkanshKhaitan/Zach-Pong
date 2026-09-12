@@ -54,6 +54,7 @@ backgroundColor = (random.randint(50, 200), random.randint(50, 200), random.rand
 
 # SOUNDS
 
+womp = pygame.mixer.Sound('wompwomp.mp3')
 bone = pygame.mixer.Sound('bone.mp3')
 coin = pygame.mixer.Sound('coin.mp3')
 click = pygame.mixer.Sound('mouseclick.mp3')
@@ -61,13 +62,17 @@ levelup = pygame.mixer.Sound('levelup.mp3')
 levelup.set_volume(0.2)
 pygame.mixer.music.load('chillmusic.mp3')
 pygame.mixer.music.play(-1)
-
+pygame.mixer.music.set_volume(0.33)
 # FONTS
 
-font = pygame.font.Font('Minecraft-Seven_v2.woff2', 50)
+font = pygame.font.Font('pirkkala.ttf', 50)
 big_font = pygame.font.Font('Minecraft-Seven_v2.woff2', 200)
 
+realvol = pygame.mixer.music.get_volume()
+
 while running:
+    realvol = 1 if realvol > 1 else realvol
+    pygame.mixer.music.set_volume(realvol)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -118,6 +123,8 @@ while running:
     if blit_scoremult == True:
         screen.blit(scoremult, random_pos)
 
+    if 50 < ball_pos.x < 100:
+        womp.play()
     if ball_pos.x > WIDTH - 40:
         vx *= -1
         bone.play()
@@ -142,6 +149,9 @@ while running:
         last_frame_score = False
 
     if ball_pos.x <= 50:
+        # LOSING
+        realvol = realvol+(0.05*dt)
+        print(realvol)
         vx = 0
         vy = 0
         blit_zach = False
@@ -161,6 +171,7 @@ while running:
 
         if mouse_rect.colliderect(playagain_rect):
             if event.type == pygame.MOUSEBUTTONDOWN:
+                realvol = 0.33
                 level = 1
                 vx = 400
                 vy = 400
@@ -171,7 +182,7 @@ while running:
                 left_paddle = pygame.Rect(WIDTH // 5 , HEIGHT // 2, 20 , paddle_height)
                 playagain_rect_x = 900
                 playagain_rect_y = 400
-
+                scorelvl = 1
                 score = 0
                 totalscore = 0
 

@@ -25,30 +25,35 @@ random_pos = pygame.Vector2(random_posx , random_posy)
 ball_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 paddle_height = 200
 left_paddle = pygame.Rect(WIDTH // 5 , HEIGHT // 2, 20 , paddle_height)
+playagain_rect_x = 900
+playagain_rect_y = 400
 
-zach = pygame.image.load('zach.png').convert_alpha()
-zach = pygame.transform.smoothscale(zach, (200, 200))
-
-bone = pygame.mixer.Sound('bone.mp3')
-coin = pygame.mixer.Sound('coin.mp3')
 score = 0
-font = pygame.font.Font('Minecraft-Seven_v2.woff2', 50)
-big_font = pygame.font.Font('Minecraft-Seven_v2.woff2', 200)
+totalscore = 0
 
 last_frame_score = False
 
 
+zach = pygame.image.load('zach.png').convert_alpha()
+zach = pygame.transform.smoothscale(zach, (200, 200))
 
+play_again = pygame.image.load('playagain.png').convert_alpha()
 
+# SOUNDS
 
+bone = pygame.mixer.Sound('bone.mp3')
+coin = pygame.mixer.Sound('coin.mp3')
+click = pygame.mixer.Sound('mouseclick.mp3')
 
+font = pygame.font.Font('Minecraft-Seven_v2.woff2', 50)
+big_font = pygame.font.Font('Minecraft-Seven_v2.woff2', 200)
 
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    
+    mouse_rect = pygame.Rect((pygame.mouse.get_pos()), (1, 1))
 
     if score >= 5:
         level += 1
@@ -66,7 +71,8 @@ while running:
     screen.blit(level_text_surface, (1000, 50))
 
 
-    
+    if event.type == pygame.MOUSEBUTTONDOWN:
+        print(pygame.mouse.get_pos())
 
     pygame.draw.circle(screen, "red", ball_pos, 40)
     pygame.draw.rect(screen , "grey" , left_paddle)
@@ -74,12 +80,10 @@ while running:
     ball_rect = pygame.Rect(ball_pos.x - 40, ball_pos.y - 40, 80, 80)
 
 
-    score_text_surface = font.render(f"Score: {score}", True, (0, 0, 0))
+    score_text_surface = font.render(f"Score: {totalscore}", True, (0, 0, 0))
     screen.blit(score_text_surface, (50, 50))
 
-    if ball_pos.x < 100:
-        vx *= -1
-        bone.play()
+
     if ball_pos.x > WIDTH - 40:
         vx *= -1
         bone.play()
@@ -96,23 +100,50 @@ while running:
         vx *= -1
         coin.play()
         score += 1
+        totalscore += 1
         last_frame_score = True
         vy += random.randint(-5,5)
     
     if not ball_rect.colliderect(left_paddle):
         last_frame_score = False
 
-    if ball_pos.x <= 200:
+    if ball_pos.x <= 50:
         vx = 0
         vy = 0
         screen.fill("black")
         lose_text_surface = big_font.render('Y  U LOST', True, (255, 0, 0))
         screen.blit(lose_text_surface, (WIDTH / 5, HEIGHT / 5))
         screen.blit(zach, (430 - 100, 215 - 100))
-        score_text_surface = font.render(f"Score: {score}", True, (255, 0, 0))
+        score_text_surface = font.render(f"Score: {totalscore}", True, (255, 0, 0))
         screen.blit(score_text_surface, (WIDTH/3, HEIGHT / 2))
         loselevel_text_surface = font.render(f"Level: {level}", True, (255, 0, 0))
         screen.blit(loselevel_text_surface, (WIDTH / 3, HEIGHT / 1.5))
+
+        # PLAY AGAIN
+
+        playagain_rect = pygame.Rect(playagain_rect_x, playagain_rect_y, 350, 150)
+        screen.blit(pygame.transform.smoothscale(play_again, playagain_rect.size), playagain_rect.topleft)
+
+        if mouse_rect.colliderect(playagain_rect):
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                level = 1
+                vx = 400
+                vy = 400
+                random_posx = random.randint(0 , WIDTH)
+                random_posy = random.randint(0, HEIGHT)
+                random_pos = pygame.Vector2(random_posx , random_posy)
+
+                ball_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
+                paddle_height = 200
+                left_paddle = pygame.Rect(WIDTH // 5 , HEIGHT // 2, 20 , paddle_height)
+                playagain_rect_x = 900
+                playagain_rect_y = 400
+
+                score = 0
+                totalscore = 0
+
+                last_frame_score = False
+                
     else:
         screen.blit(zach, (ball_pos.x -100 , ball_pos.y - 100))
 

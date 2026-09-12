@@ -7,6 +7,7 @@ pygame.init()
 pygame.mixer.init()
 pygame.font.init()
 
+# GAME VARIABLES
 WIDTH = 1280
 HEIGHT = 720
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -15,10 +16,16 @@ clock = pygame.time.Clock()
 running = True
 dt = 0
 
+random_posy = 0
+random_posx = 0
+random_pos = 0
+
 level = 1
 vx = 400
 vy = 400
-
+random_posx = random.randint(0 , WIDTH)
+random_posy = random.randint(0, HEIGHT)
+random_pos = pygame.Vector2(random_posx , random_posy)
 
 ball_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 paddle_height = 200
@@ -29,21 +36,33 @@ playagain_rect_y = 400
 score = 0
 totalscore = 0
 
+blit_scoremult = False
+scorelvl = 1
 last_frame_score = False
 
+# IMAGES
 
 zach = pygame.image.load('zach.png').convert_alpha()
 zach = pygame.transform.smoothscale(zach, (200, 200))
 
 play_again = pygame.image.load('playagain.png').convert_alpha()
 
+scoremult = pygame.image.load('2xscore.png').convert_alpha()
+scoremult = pygame.transform.smoothscale(scoremult, (100, 100))
+
+backgroundColor = (random.randint(50, 200), random.randint(50, 200), random.randint(50, 200))
+
 # SOUNDS
 
 bone = pygame.mixer.Sound('bone.mp3')
 coin = pygame.mixer.Sound('coin.mp3')
 click = pygame.mixer.Sound('mouseclick.mp3')
-oof = pygame.mixer.Sound('oof.mp3')
 levelup = pygame.mixer.Sound('levelup.mp3')
+levelup.set_volume(0.2)
+pygame.mixer.music.load('chillmusic.mp3')
+pygame.mixer.music.play(-1)
+
+# FONTS
 
 font = pygame.font.Font('Minecraft-Seven_v2.woff2', 50)
 big_font = pygame.font.Font('Minecraft-Seven_v2.woff2', 200)
@@ -54,39 +73,50 @@ while running:
             running = False
 
     mouse_rect = pygame.Rect((pygame.mouse.get_pos()), (1, 1))
+    ball_rect = pygame.Rect(ball_pos.x - 40, ball_pos.y - 40, 80, 80)
+    scoremult_rect = pygame.Rect(random_posx, random_posy, 100, 100)
 
     if score >= 5:
         levelup.play()
         level += 1
-        score = 0
+        score -= 5
         vx += 100
         vy += 100
-        paddle_height *= 0.8
-        rr = random.randint(50, 200)
-        rg = random.randint(50, 200)
-        rb = random.randint(50, 200)
+        paddle_height *= 0.9 
+        random_posx = random.randint(0 , WIDTH)
+        random_posy = random.randint(0, HEIGHT)
+        random_pos = pygame.Vector2(random_posx , random_posy)
+        backgroundColor = (random.randint(50, 200), random.randint(50, 200), random.randint(50, 200))
+        scorelvl = 1
+        if random.randint(1, 3) == 1:
+            blit_scoremult = True
 
-    if level % 2 == 0:
-        screen.fill((rr, rg, rb))
-    if level % 2 != 0:
-        screen.fill('purple')
+    if mouse_rect.colliderect(scoremult_rect):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            blit_scoremult = False
+            scorelvl = 2
+            click.play()
+
+
+    screen.fill(backgroundColor)
 
     level_text_surface = font.render(f"Level: {level}", True, (0, 0, 0))
     screen.blit(level_text_surface, (1000, 50))
 
 
-    if event.type == pygame.MOUSEBUTTONDOWN:
-        print(pygame.mouse.get_pos())
+    # if event.type == pygame.MOUSEBUTTONDOWN:
+        # print(pygame.mouse.get_pos())
 
     pygame.draw.circle(screen, "red", ball_pos, 40)
+    left_paddle.h = paddle_height
     pygame.draw.rect(screen , "grey" , left_paddle)
-
-    ball_rect = pygame.Rect(ball_pos.x - 40, ball_pos.y - 40, 80, 80)
 
 
     score_text_surface = font.render(f"Score: {totalscore}", True, (0, 0, 0))
     screen.blit(score_text_surface, (50, 50))
 
+    if blit_scoremult == True:
+        screen.blit(scoremult, random_pos)
 
     if ball_pos.x > WIDTH - 40:
         vx *= -1
@@ -103,18 +133,18 @@ while running:
     if ball_rect.colliderect(left_paddle) and not last_frame_score:
         vx *= -1
         coin.play()
-        score += 1
-        totalscore += 1
+        score += scorelvl
+        totalscore += scorelvl
         last_frame_score = True
         vy += random.randint(-5,5)
     
     if not ball_rect.colliderect(left_paddle):
         last_frame_score = False
 
-
-    if ball_pos.x <= 100:
+    if ball_pos.x <= 50:
         vx = 0
         vy = 0
+        blit_zach = False
         screen.fill("black")
         lose_text_surface = big_font.render('Y  U LOST', True, (255, 0, 0))
         screen.blit(lose_text_surface, (WIDTH / 5, HEIGHT / 5))
@@ -131,13 +161,10 @@ while running:
 
         if mouse_rect.colliderect(playagain_rect):
             if event.type == pygame.MOUSEBUTTONDOWN:
-                click.play()
                 level = 1
                 vx = 400
                 vy = 400
-                random_posx = random.randint(0 , WIDTH)
-                random_posy = random.randint(0, HEIGHT)
-                random_pos = pygame.Vector2(random_posx , random_posy)
+                click.play()
 
                 ball_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
                 paddle_height = 200
@@ -151,6 +178,9 @@ while running:
                 last_frame_score = False
                 
     else:
+        blit_zach = True
+        
+    if blit_zach == True:
         screen.blit(zach, (ball_pos.x -100 , ball_pos.y - 100))
 
     ball_pos.y += vy * dt
@@ -167,9 +197,6 @@ while running:
     if keys[pygame.K_s]:
         left_paddle.y += 300 * dt
 
-
-
-    # flip() the display to put your work on screen
     pygame.display.flip()
 
     # limits FPS to 60

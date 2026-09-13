@@ -161,12 +161,12 @@ while running:
         vy *= -1
         bone.play()
         ball_pos.y += 5
-        vy += random.randint(-5, 5)
+        vy += random.randint(-7, 7)
     if ball_pos.y > HEIGHT - 70:
         vy *= -1
         bone.play()
         ball_pos.y -= 5
-        vy += random.randint(-5, 5)
+        vy += random.randint(-7, 7)
 
     if ball_rect.colliderect(left_paddle) and not last_frame_score:
         vx *= -1

@@ -23,10 +23,10 @@ random_pos = 0
 level = 1
 vx = 400
 vy = 400
-random_posx = random.randint(0 , WIDTH)
-random_posy = random.randint(0, HEIGHT)
+random_posx = random.randint(100 , WIDTH - 100)
+random_posy = random.randint(100, HEIGHT - 100)
 random_pos = pygame.Vector2(random_posx , random_posy)
-
+blit_zach = True
 ball_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 paddle_height = 200
 left_paddle = pygame.Rect(WIDTH // 5 , HEIGHT // 2, 20 , paddle_height)
@@ -37,7 +37,12 @@ score = 0
 totalscore = 0
 
 blit_scoremult = False
+blit_paddlemult = False
+
 scorelvl = 1
+paddlemultlvl = 1
+current_paddleheight = paddle_height
+
 last_frame_score = False
 
 # IMAGES
@@ -49,6 +54,9 @@ play_again = pygame.image.load('playagain.png').convert_alpha()
 
 scoremult = pygame.image.load('2xscore.png').convert_alpha()
 scoremult = pygame.transform.smoothscale(scoremult, (100, 100))
+
+paddlemult = pygame.image.load('2xpaddle.png').convert_alpha()
+paddlemult = pygame.transform.smoothscale(paddlemult, (100, 100))
 
 backgroundColor = (random.randint(50, 200), random.randint(50, 200), random.randint(50, 200))
 
@@ -63,14 +71,16 @@ levelup.set_volume(0.2)
 pygame.mixer.music.load('chillmusic.mp3')
 pygame.mixer.music.play(-1)
 pygame.mixer.music.set_volume(0.33)
+realvol = pygame.mixer.music.get_volume()
+
 # FONTS
 
 font = pygame.font.Font('pirkkala.ttf', 50)
 big_font = pygame.font.Font('Minecraft-Seven_v2.woff2', 200)
 
-realvol = pygame.mixer.music.get_volume()
 
 while running:
+    
     realvol = 1 if realvol > 1 else realvol
     pygame.mixer.music.set_volume(realvol)
     for event in pygame.event.get():
@@ -80,6 +90,7 @@ while running:
     mouse_rect = pygame.Rect((pygame.mouse.get_pos()), (1, 1))
     ball_rect = pygame.Rect(ball_pos.x - 40, ball_pos.y - 40, 80, 80)
     scoremult_rect = pygame.Rect(random_posx, random_posy, 100, 100)
+    paddlemult_rect = pygame.Rect(random_posx, random_posy, 100, 100)
 
     if score >= 5:
         levelup.play()
@@ -87,20 +98,36 @@ while running:
         score -= 5
         vx += 100
         vy += 100
-        paddle_height *= 0.9 
-        random_posx = random.randint(0 , WIDTH)
-        random_posy = random.randint(0, HEIGHT)
+        paddle_height *= 0.9
+        random_posx = random.randint(100 , WIDTH - 100)
+        random_posy = random.randint(100, HEIGHT - 100)
         random_pos = pygame.Vector2(random_posx , random_posy)
         backgroundColor = (random.randint(50, 200), random.randint(50, 200), random.randint(50, 200))
+        paddle_height = current_paddleheight
         scorelvl = 1
-        if random.randint(1, 3) == 1:
+        paddlemultlvl = 1
+        random_num = random.randint(1,2)
+        if random_num == 1:
             blit_scoremult = True
+        if random_num == 2:
+            blit_paddlemult = True
+            
 
     if mouse_rect.colliderect(scoremult_rect):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            blit_scoremult = False
-            scorelvl = 2
-            click.play()
+            if blit_scoremult == True:
+                blit_scoremult = False
+                scorelvl = 2
+                click.play()
+    if mouse_rect.colliderect(paddlemult_rect):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if blit_paddlemult == True:
+                blit_paddlemult = False
+                paddlemultlvl = 2
+                current_paddleheight = paddle_height
+                paddle_height *= paddlemultlvl
+                click.play()
+
 
 
     screen.fill(backgroundColor)
@@ -114,7 +141,7 @@ while running:
 
     pygame.draw.circle(screen, "red", ball_pos, 40)
     left_paddle.h = paddle_height
-    pygame.draw.rect(screen , "grey" , left_paddle)
+    pygame.draw.rect(screen , "black" , left_paddle)
 
 
     score_text_surface = font.render(f"Score: {totalscore}", True, (0, 0, 0))
@@ -122,6 +149,8 @@ while running:
 
     if blit_scoremult == True:
         screen.blit(scoremult, random_pos)
+    if blit_paddlemult == True:
+        screen.blit(paddlemult, random_pos)
 
     if 50 < ball_pos.x < 100:
         womp.play()
@@ -151,10 +180,11 @@ while running:
     if ball_pos.x <= 50:
         # LOSING
         realvol = realvol+(0.05*dt)
-        print(realvol)
         vx = 0
         vy = 0
         blit_zach = False
+        zach = pygame.image.load('turbozach.png').convert_alpha()
+        zach = pygame.transform.smoothscale(zach, (200, 200))
         screen.fill("black")
         lose_text_surface = big_font.render('Y  U LOST', True, (255, 0, 0))
         screen.blit(lose_text_surface, (WIDTH / 5, HEIGHT / 5))
@@ -185,6 +215,10 @@ while running:
                 scorelvl = 1
                 score = 0
                 totalscore = 0
+                paddlemultlvl = 1
+
+                zach = pygame.image.load('zach.png').convert_alpha()
+                zach = pygame.transform.smoothscale(zach, (200, 200))
 
                 last_frame_score = False
                 

@@ -160,11 +160,13 @@ while running:
     if ball_pos.y < 100:
         vy *= -1
         bone.play()
-        vy += random.randint(-5,5)
+        ball_pos.y += 5
+        vy += random.randint(-5, 5)
     if ball_pos.y > HEIGHT - 70:
         vy *= -1
         bone.play()
-        vy += random.randint(-5,5)
+        ball_pos.y -= 5
+        vy += random.randint(-5, 5)
 
     if ball_rect.colliderect(left_paddle) and not last_frame_score:
         vx *= -1
@@ -176,6 +178,8 @@ while running:
     
     if not ball_rect.colliderect(left_paddle):
         last_frame_score = False
+
+    print(vx, vy)
 
     if ball_pos.x <= 50:
         # LOSING
